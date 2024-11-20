@@ -1,26 +1,26 @@
 
-# Logo Detection Using Pre-trained Model
+# Logo Detection in Videos
 
-This project implements logo detection in video frames using a pre-trained model saved in `.h5` format. The model is loaded using TensorFlow, and the video is processed frame by frame using OpenCV. When a logo is detected in a frame, the system prints the time in the video where the logo was detected and tAKE SCREENSHOTS.
+This project leverages a pre-trained deep learning model to detect logos in videos. The system processes video frames, classifies them as having or not having a logo, and organizes the videos into appropriate folders based on the detection results. The project uses TensorFlow for model inference and OpenCV for real-time video processing.
 
 ## Features
-- Load a pre-trained logo detection model saved as `.h5`.
-- Process video frames in real-time using OpenCV.
-- Detect logos based on the model's prediction.
-- Display the video and take screenshots when detecting logo.
+
+- **Logo Detection**: Classifies whether a logo is present in each video.
+- **Real-time Processing**: Processes each video frame and applies the pre-trained model to detect logos.
+- **Video Organization**: Sorts videos into `with_logo` and `without_logo` folders based on detection results.
+- **Efficient Frame Skipping**: Skips frames to speed up processing, reducing computational load.
+- **Screenshots**: Optionally saves screenshots when a logo is detected (commented out in the script).
 
 ## Prerequisites
 
-Before running the project, make sure you have the following installed:
+Ensure you have the following Python libraries installed:
 
 - Python 3.7 or higher
-- TensorFlow (for model inference)
-- OpenCV (for video processing)
-- NumPy (for data manipulation)
+- TensorFlow
+- OpenCV
+- NumPy
 
-### Required Libraries
-
-You can install the required libraries by running:
+You can install the required libraries using `pip`:
 
 ```bash
 pip install tensorflow opencv-python numpy
@@ -30,94 +30,112 @@ pip install tensorflow opencv-python numpy
 
 ```
 logo_detection_project/
-├── main.py       # Python script for logo detection
-├── logo_detection_model.h5  # Pre-trained model file
-├── sample_video.mp4        # Sample video file (optional)
-└── README.md               # This readme file
-|__ screenshot              # this is where the screenshots saved
+├── main.py                   # Main script for logo detection and video classification
+├── logo_detection_model_1.h5  # Pre-trained model for logo detection (adjust path as needed)
+├── README.md                 # Project documentation
+└── screenshots/              # Folder for saving screenshots (optional)
 ```
 
-- `logo_detection_model.h5`: The pre-trained model for logo detection in `.h5` format.
-- `sample_video.mp4`: A sample video file you want to process.
-- `main.py`: The main Python script that runs the detection process.
-# accuracy and loss
-To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
-Epoch 1/10
-24/24 [==============================] - 59s 2s/step - loss: 0.4551 - accuracy: 0.8673
-Epoch 2/10
-24/24 [==============================] - 47s 2s/step - loss: 0.3341 - accuracy: 0.8995
-Epoch 3/10
-24/24 [==============================] - 52s 2s/step - loss: 0.3073 - accuracy: 0.8995
-Epoch 4/10
-24/24 [==============================] - 56s 2s/step - loss: 0.2769 - accuracy: 0.8995
-Epoch 5/10
-24/24 [==============================] - 56s 2s/step - loss: 0.2472 - accuracy: 0.8995
-Epoch 6/10
-24/24 [==============================] - 57s 2s/step - loss: 0.2402 - accuracy: 0.9062
-Epoch 7/10
-24/24 [==============================] - 60s 2s/step - loss: 0.2301 - accuracy: 0.9062
-Epoch 8/10
-24/24 [==============================] - 57s 2s/step - loss: 0.1936 - accuracy: 0.9223
-Epoch 9/10
-24/24 [==============================] - 57s 2s/step - loss: 0.1856 - accuracy: 0.9316
-Epoch 10/10
-24/24 [==============================] - 60s 2s/step - loss: 0.2009 - accuracy: 0.9142
+- **`logo_detection_model_1.h5`**: The pre-trained model file used for logo detection.
+- **`main.py`**: Main Python script that handles video processing and classification.
+- **`screenshots/`**: Folder where screenshots are saved when a logo is detected (can be enabled in the code).
+
+## Model Details
+
+The model is a pre-trained deep learning model that classifies frames from videos as containing a logo or not. The model was trained to recognize logos and is used for inference in this project.
+
+- **Model Type**: Binary classification (logo vs. no logo).
+- **Input Size**: The model expects input frames of size `(150, 150, 3)`.
+- **Output**: The model outputs a confidence score between 0 and 1. If the score exceeds a threshold (default: 0.9), the frame is classified as containing a logo.
+
+## How It Works
+
+### 1. **Preprocessing the Frame**
+Each frame of the video is resized to `150x150` pixels and normalized to a range between 0 and 1. This ensures the input format matches what the model expects.
+
+### 2. **Logo Detection**
+The system processes each video frame and uses the pre-trained model to predict whether a logo is present. If the model’s confidence exceeds the defined threshold (default: 0.9), the frame is marked as having a logo.
+
+### 3. **Frame Skipping for Efficiency**
+To speed up the process, the system skips a configurable number of frames (default: 5). This reduces redundant processing, especially in videos with little motion.
+
+### 4. **Classifying and Sorting Videos**
+Once a video is processed, the script moves the video to one of the following folders based on the detection results:
+- `with_logo/`: Contains videos where logos were detected.
+- `without_logo/`: Contains videos where no logos were detected.
+
+### 5. **Screenshots (Optional)**
+If logo detection is enabled, the system can save screenshots when a logo is detected. These screenshots are saved in the `screenshots/` directory for later review.
 
 ## Usage
 
-### Step 1: Update Video Path and Model Path
-In the `main.py` script, update the path to your video file and pre-trained model:
+### Step 1: Update Paths
+Before running the script, ensure the correct paths to the video files and the pre-trained model are set in the `main.py` file. 
 
+Example:
 ```python
-video_path = 'path_to_your_video.mp4'  # Update the video path here
-model = tf.keras.models.load_model('path_to_your_model/logo_detection_model.h5')  # Update the model path here
+model = tf.keras.models.load_model('path_to_your_model/logo_detection_model_1.h5')  # Adjust the path
 ```
-
-Make sure the `.h5` model file is in the correct directory or provide the full path to it.
 
 ### Step 2: Run the Script
 
-After updating the paths, run the script by executing:
+Run the script from the command line:
 
 ```bash
 python main.py
 ```
 
+You will be prompted to enter the path to the folder containing the videos and the path to the output folder where results will be saved.
+
 ### Step 3: Observe the Output
 
-- The script will process the video frame by frame.
-- When the model detects a logo in a frame, it will print the timestamp (in seconds) of the detection in the terminal and will take scrrenshot and save it in the screenshot folder .
-- The video will be displayed in a window using OpenCV. To stop the process, press the `q` key.
+- The script will process each video and print the classification results.
+- Videos will be moved to either the `with_logo` or `without_logo` folder based on the detection results.
+
+### Step 4: View Detection Results
+
+Detection results for each video are displayed in the console. For each frame where a logo is detected, the following information will be displayed:
+- **Class ID**: The ID of the detected class (logo vs. no logo).
+- **Start Time**: The timestamp (in seconds) when the logo was detected.
+- **Duration**: Duration for which the logo was detected.
+- **Confidence**: The confidence score for the logo detection.
 
 ### Example Output:
+
 ```
-Model Loaded.
-Logo detected at time: 12.34 seconds
-Logo detected at time: 45.67 seconds
+Processing video: C:/path/to/video.mp4
+Logo detected in video: video.mp4
+Detected Logo Class ID: 1, Start Time: 12.34s, Duration: 2s, Confidence: 0.92
+Screenshot saved: C:/path/to/screenshots/video_class_1_time_12.34.png
 ```
 
-### Step 4: Close the Video
-To stop the video and close the OpenCV window, press the `q` key.
+### Step 5: Video Organization
+
+Based on the detection results:
+- Videos with logos will be moved to the `with_logo/` folder.
+- Videos without logos will be moved to the `without_logo/` folder.
+
+## Screenshots
+
+When a logo is detected, you can uncomment the `save_screenshot` function call in the `process_video` function to save screenshots of the frames where logos are detected. These screenshots will be saved in the `screenshots/` folder.
+
+```python
+# Uncomment to enable screenshot saving
+# save_screenshot(frame, class_id, current_time, os.path.basename(video_path), os.path.dirname(video_path))
+```
 
 ## Troubleshooting
 
-- If the video file path is incorrect, ensure the path to the video is valid and accessible.
-- Ensure the model file (`logo_detection_model.h5`) is present at the specified location.
-- If you encounter any issues with OpenCV displaying the video, check your OpenCV installation.
-
-## Model Details
-
-- **Model Type**: The project assumes you are using a binary classification model (logo vs. no logo) based on the output structure.
-- **Input Shape**: The input shape expected by the model is `(150, 150, 3)` (this can be changed based on your model's configuration).
-- **Output**: The model outputs a probability score indicating whether a logo is detected. A threshold of `0.9` is used to classify the prediction.
+- **Incorrect video path**: Ensure the video folder path is correct and contains valid video files.
+- **Missing model file**: Ensure the model file (`logo_detection_model_1.h5`) is located at the specified path.
+- **OpenCV issues**: If the video window does not display properly, verify your OpenCV installation and graphics drivers.
 
 ## License
 
-
----
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
-- TensorFlow for providing the framework for the pre-trained model.
-- OpenCV for video processing.
-- NumPy for numerical operations.
+- **TensorFlow**: For the deep learning framework used to train and deploy the logo detection model.
+- **OpenCV**: For enabling real-time video processing and manipulation.
+- **NumPy**: For handling numerical operations in frame processing.

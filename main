@@ -71,7 +71,7 @@ def process_video(video_path, detection_threshold=0.9, skip_frames=5):
         # If confidence is above threshold, mark the video as having a logo
         if confidence >= detection_threshold:
             logo_detected = True
-            save_screenshot(frame, class_id, current_time, os.path.basename(video_path), os.path.dirname(video_path))
+           # save_screenshot(frame, class_id, current_time, os.path.basename(video_path), os.path.dirname(video_path))
 
         # Update the previous frame for the next iteration
         previous_frame = gray_frame
