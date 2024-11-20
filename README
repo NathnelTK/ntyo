@@ -1,0 +1,123 @@
+
+# Logo Detection Using Pre-trained Model
+
+This project implements logo detection in video frames using a pre-trained model saved in `.h5` format. The model is loaded using TensorFlow, and the video is processed frame by frame using OpenCV. When a logo is detected in a frame, the system prints the time in the video where the logo was detected and tAKE SCREENSHOTS.
+
+## Features
+- Load a pre-trained logo detection model saved as `.h5`.
+- Process video frames in real-time using OpenCV.
+- Detect logos based on the model's prediction.
+- Display the video and take screenshots when detecting logo.
+
+## Prerequisites
+
+Before running the project, make sure you have the following installed:
+
+- Python 3.7 or higher
+- TensorFlow (for model inference)
+- OpenCV (for video processing)
+- NumPy (for data manipulation)
+
+### Required Libraries
+
+You can install the required libraries by running:
+
+```bash
+pip install tensorflow opencv-python numpy
+```
+
+## Project Structure
+
+```
+logo_detection_project/
+├── main.py       # Python script for logo detection
+├── logo_detection_model.h5  # Pre-trained model file
+├── sample_video.mp4        # Sample video file (optional)
+└── README.md               # This readme file
+|__ screenshot              # this is where the screenshots saved
+```
+
+- `logo_detection_model.h5`: The pre-trained model for logo detection in `.h5` format.
+- `sample_video.mp4`: A sample video file you want to process.
+- `main.py`: The main Python script that runs the detection process.
+# accuracy and loss
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Epoch 1/10
+24/24 [==============================] - 59s 2s/step - loss: 0.4551 - accuracy: 0.8673
+Epoch 2/10
+24/24 [==============================] - 47s 2s/step - loss: 0.3341 - accuracy: 0.8995
+Epoch 3/10
+24/24 [==============================] - 52s 2s/step - loss: 0.3073 - accuracy: 0.8995
+Epoch 4/10
+24/24 [==============================] - 56s 2s/step - loss: 0.2769 - accuracy: 0.8995
+Epoch 5/10
+24/24 [==============================] - 56s 2s/step - loss: 0.2472 - accuracy: 0.8995
+Epoch 6/10
+24/24 [==============================] - 57s 2s/step - loss: 0.2402 - accuracy: 0.9062
+Epoch 7/10
+24/24 [==============================] - 60s 2s/step - loss: 0.2301 - accuracy: 0.9062
+Epoch 8/10
+24/24 [==============================] - 57s 2s/step - loss: 0.1936 - accuracy: 0.9223
+Epoch 9/10
+24/24 [==============================] - 57s 2s/step - loss: 0.1856 - accuracy: 0.9316
+Epoch 10/10
+24/24 [==============================] - 60s 2s/step - loss: 0.2009 - accuracy: 0.9142
+
+## Usage
+
+### Step 1: Update Video Path and Model Path
+In the `main.py` script, update the path to your video file and pre-trained model:
+
+```python
+video_path = 'path_to_your_video.mp4'  # Update the video path here
+model = tf.keras.models.load_model('path_to_your_model/logo_detection_model.h5')  # Update the model path here
+```
+
+Make sure the `.h5` model file is in the correct directory or provide the full path to it.
+
+### Step 2: Run the Script
+
+After updating the paths, run the script by executing:
+
+```bash
+python main.py
+```
+
+### Step 3: Observe the Output
+
+- The script will process the video frame by frame.
+- When the model detects a logo in a frame, it will print the timestamp (in seconds) of the detection in the terminal and will take scrrenshot and save it in the screenshot folder .
+- The video will be displayed in a window using OpenCV. To stop the process, press the `q` key.
+
+### Example Output:
+```
+Model Loaded.
+Logo detected at time: 12.34 seconds
+Logo detected at time: 45.67 seconds
+```
+
+### Step 4: Close the Video
+To stop the video and close the OpenCV window, press the `q` key.
+
+## Troubleshooting
+
+- If the video file path is incorrect, ensure the path to the video is valid and accessible.
+- Ensure the model file (`logo_detection_model.h5`) is present at the specified location.
+- If you encounter any issues with OpenCV displaying the video, check your OpenCV installation.
+
+## Model Details
+
+- **Model Type**: The project assumes you are using a binary classification model (logo vs. no logo) based on the output structure.
+- **Input Shape**: The input shape expected by the model is `(150, 150, 3)` (this can be changed based on your model's configuration).
+- **Output**: The model outputs a probability score indicating whether a logo is detected. A threshold of `0.9` is used to classify the prediction.
+
+## License
+
+
+---
+
+## Acknowledgments
+
+- TensorFlow for providing the framework for the pre-trained model.
+- OpenCV for video processing.
+- NumPy for numerical operations.

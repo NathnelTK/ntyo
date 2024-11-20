@@ -1,0 +1,134 @@
+import numpy as np
+import tensorflow as tf
+import os
+import time
+import cv2
+import shutil
+
+# Loading the trained model
+model = tf.keras.models.load_model('C:/Users/Administrator/Desktop/ads detection/logo_detection_model_1.h5')  # Adjust the path
+
+# Function to preprocess the frame
+def preprocess_frame(frame):
+    frame = cv2.resize(frame, (150, 150))  # Resize based on the model's input size
+    frame = frame / 255.0  # Normalize pixel values
+    return np.expand_dims(frame, axis=0)  # Add batch dimension
+
+# Function to save a screenshot
+def save_screenshot(frame, class_id, current_time, video_name, output_dir):
+    screenshot_dir = os.path.join(output_dir, 'screenshots')
+    os.makedirs(screenshot_dir, exist_ok=True)
+    screenshot_path = os.path.join(screenshot_dir, f'{video_name}_class_{class_id}_time_{current_time:.2f}.png')
+    cv2.imwrite(screenshot_path, frame)
+    print(f'Screenshot saved: {screenshot_path}')
+
+# Function to process video frames and classify whether it has a logo or not
+def process_video(video_path, detection_threshold=0.9, skip_frames=5):
+    cap = cv2.VideoCapture(video_path)
+    detection_results = []
+    logo_detected = False  # Flag to indicate if logo was detected in the video
+    previous_frame = None
+    frame_counter = 0
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        # Skip frames to make the processing faster
+        if frame_counter % skip_frames != 0:
+            frame_counter += 1
+            continue
+
+        # Convert frame to grayscale to compare with the previous frame (for faster comparison)
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        if previous_frame is not None:
+            # Calculate the absolute difference between the current and previous frame
+            frame_diff = cv2.absdiff(previous_frame, gray_frame)
+            non_zero_count = np.count_nonzero(frame_diff)
+
+            # If the difference is small, skip the frame
+            if non_zero_count < 10000:  # Threshold for frame similarity, adjust as needed
+                frame_counter += 1
+                continue
+
+        # Preprocess the frame
+        tensor = preprocess_frame(frame)
+        predictions = model.predict(tensor)
+        class_id = np.argmax(predictions)  # Get the index of the highest probability
+        confidence = np.max(predictions)
+
+        # Record detection results
+        current_time = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000  # Get current time in seconds
+        detection_results.append({
+            'start_time': current_time,
+            'duration': 2,  # Placeholder duration
+            'class_id': class_id,
+            'confidence': confidence,
+        })
+
+        # If confidence is above threshold, mark the video as having a logo
+        if confidence >= detection_threshold:
+            logo_detected = True
+            save_screenshot(frame, class_id, current_time, os.path.basename(video_path), os.path.dirname(video_path))
+
+        # Update the previous frame for the next iteration
+        previous_frame = gray_frame
+        frame_counter += 1
+
+    cap.release()
+
+    return logo_detected, detection_results
+
+# Function to classify and move videos into folders
+def classify_and_save_videos(input_folder, output_folder, detection_threshold=0.9, skip_frames=5):
+    # Create output directories
+    with_logo_dir = os.path.join(output_folder, 'with_logo')
+    without_logo_dir = os.path.join(output_folder, 'without_logo')
+    os.makedirs(with_logo_dir, exist_ok=True)
+    os.makedirs(without_logo_dir, exist_ok=True)
+
+    # Get all video files from the input folder
+    video_files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.mp4', '.avi', '.mov', '.mkv'))]
+
+    for video_file in video_files:
+        video_path = os.path.join(input_folder, video_file)
+
+        # Process the video
+        print(f"Processing video: {video_path}")
+        logo_detected, detection_results = process_video(video_path, detection_threshold, skip_frames)
+
+        # Move the video to appropriate folder based on logo detection
+        if logo_detected:
+            print(f"Logo detected in video: {video_file}")
+            shutil.move(video_path, os.path.join(with_logo_dir, video_file))
+        else:
+            print(f"No logo detected in video: {video_file}")
+            shutil.move(video_path, os.path.join(without_logo_dir, video_file))
+
+        # Optionally, print out detection results for each video
+        print("Detection Results:")
+        for result in detection_results:
+            print(f"Detected Logo Class ID: {result['class_id']}, Start Time: {result['start_time']:.2f}s, Duration: {result['duration']}s, Confidence: {result['confidence']:.2f}")
+
+# Main function to run the application
+def main():
+    input_folder = input("Enter the path to the folder containing the videos: ")
+    output_folder = input("Enter the path to the folder where results will be saved: ")
+
+    if not os.path.exists(input_folder):
+        print("Input folder not found. Please check the path.")
+        return
+
+    if not os.path.exists(output_folder):
+        print("Output folder not found. Creating it now...")
+        os.makedirs(output_folder)
+
+    print("Classifying videos...")
+
+    # Classify and move videos into appropriate folders
+    classify_and_save_videos(input_folder, output_folder)
+
+if __name__ == "__main__":
+    main()
